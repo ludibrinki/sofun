@@ -7,8 +7,9 @@
 #include <map>
 #include <algorithm>
 #include <utility>
+#include <fstream>
 using namespace std;
-
+//compile with g++ -o sfrepl sofunrepl.cpp -lstdc++ -std=c++11
 
 //----------------------------------------------------defs
 typedef vector<string> stack; //Ein Stack ist ein vector von Strings. Ein echter Stack wäre für die REPL-Funktionen unpraktisch gewesen ;)
@@ -47,7 +48,6 @@ string desplit(stack inp_vector) { //pythons join()
 	string identifier=inp_vector.back(); inp_vector.pop_back();
 	return desplit(inp_vector)+identifier+" "; //rekursion
 }
-
 
 //----------------------------------------------------built-ins
 stack bi_math(stack line, long stack_pointer, string operation) {
@@ -212,9 +212,21 @@ stack parse(stack line) { //syntaktische Analyse (Funktionsdeklaration oder eval
 	return line;
 }
 
+void eval_file(string name) {
+	ifstream fun_file (name);
+	string line;
+	if (fun_file.is_open()) {
+    while (getline(fun_file,line)) {
+		if (line[0]!='#') parse(split(line)); //wenns kein kommentar ist, führs aus
+    }
+    fun_file.close();
+  } else cout << "Unable to open file " << name << endl; 
+}
+
 bool parse_command(string line) {
-	if (line == ":quit" || line == ":q") return true;
-	if (line == ":debug" || line == ":d") debug_mode = !debug_mode;
+	if (line[1] == 'q') return true;
+	if (line[1] == 'd') debug_mode = !debug_mode;
+	if (line[1] == 'l') eval_file(split(line)[1]);
 	return false;
 }
 
