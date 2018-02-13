@@ -1,4 +1,4 @@
-# SOFun
+# SOFUNLANG
 This repository contains my REPL for a stack-oriented functional language in reverse polish notation. See the language specification for more information about the language itself. 
 Just to get an idea of the syntax, this is the solution of the first task of projecteuler.net: "Find the sum of all the multiples of 3 or 5 below 1000.":
 
