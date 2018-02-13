@@ -42,14 +42,20 @@ Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir gena
 
 Built-in-Funktionen:
 
-Logische Operationen	| Rechenoperationen
+Logische Operationen:		
 
-< (Kleiner als)				  + (plus)
-= (ist gleich)				  - (minus)
-> (größer als)				  * (mal)
-| (oder)					      / (geteilt)
-& (und)						      % (modulo)
+< (Kleiner als)				  
+= (ist gleich)				  
+> (größer als)				  
+| (oder)					      
+& (und)						      
 ~ (nicht)
 
+Rechenoperationen:
 
++ (plus)
+- (minus)
+* (mal)
+/ (geteilt)
+% (modulo)
 
