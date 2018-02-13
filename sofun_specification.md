@@ -8,12 +8,12 @@ Funktionen returnen Stacks aus mehreren Elementen statt nur einem Element. Die M
 returnten Elemente kann variieren. 
 Insgesamt kann eine Funktion sozusagen als bedingter Teil des mainstacks 
 betrachtet werden:
-	Haben wir einen Stack 
-	"1 2 3 a",
-	wobei a eine Funktion ist, die zwei Argumente nimmt und sie 
-	in umgekehrter Reihenfolge zurückgibt (e2 e1 a : e1 e2), wird der Stack danach folgendermaßen
-	aussehen: 
-	"1 3 2".
+Haben wir einen Stack 
+	1 2 3 a
+wobei a eine Funktion ist, die zwei Argumente nimmt und sie 
+in umgekehrter Reihenfolge zurückgibt (e2 e1 a : e1 e2), wird der Stack danach folgendermaßen
+aussehen: 
+	1 3 2.
 Funktionen werden also sozusagen argumentabhängig zu einem Stack der dann anstelle der Funktion
 im mainstack erscheint. Das funktionale Prinzip, dass Funktionen beim selben Input immer denselben
 output returnen müssen, ist so auch in SOFUNLANG gewährleistet und auch SOFUNLANG beruht
@@ -28,7 +28,7 @@ voneinander getrennt sein müssen.
 
 Funktionen werden mit ":" deklariert. Eine Funktion, die eine Zahl im Quadrat zurückgibt, schreibt
 man also: 
-	"a quad : a a *",
+	a quad : a a *
 wobei auch Rekursion möglich ist.
 Komplexere Funktionen benötigen natürlich Verzweigungen, in SOFUNLANG werden Verzweigungen mit einem "?"
 ausgedrückt. Verzweigte Funktion muss mindestens zwei Fragezeichen enthalten: Jedes Fragezeichen in einer Funktion,
@@ -36,7 +36,7 @@ bis auf das letzte sind gefolgt von einer Kondition, der Stack nach dem letzten 
 keine der vorherigen Konditionen zutrifft. Dieses letzte Fragezeichen ist Pflicht, da eine Funktion immer einen 
 Rückgabewert besitzen muss. Es kann allerdings ein leerer Stack zurückgegeben werden.
 Wollen wir eine Funktion für alle Potenzen definieren tun wir das also mit;
-	"exp base ^ ? 1 exp < : 1 ? base 1 exp - base ^ *".
+	exp base ^ ? 1 exp < : 1 ? base 1 exp - base ^ *
 Hier wird solange base mit sich selbst multipliziert, bis exp, von dem bei jeder 
 Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir genau exp mal.
 
@@ -44,18 +44,18 @@ Built-in-Funktionen:
 
 Logische Operationen:		
 
-< (Kleiner als)				  
-= (ist gleich)				  
-> (größer als)				  
-| (oder)					      
-& (und)						      
-~ (nicht)
+"<" (Kleiner als)				  
+"=" (ist gleich)				  
+">" (größer als)				  
+"|" (oder)					      
+"&" (und)						      
+"~" (nicht)
 
 Rechenoperationen:
 
-+ (plus)
-- (minus)
-* (mal)
-/ (geteilt)
-% (modulo)
+"+" (plus)
+"-" (minus)
+"\*" (mal)
+"/" (geteilt)
+"%" (modulo)
 
