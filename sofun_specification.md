@@ -54,6 +54,6 @@ Logische Operationen | Mathematische Operationen
 ------------ | -------------
 "<" (Kleiner als) | "+" (plus)
 "=" (ist gleich) | "-" (minus)			  
-"|" (oder) | "\*" (mal)			      
+"\|" (oder) | "\*" (mal)			      
 "&" (und) | "/" (geteilt)				      
 "~" (nicht) | "%" (modulo)
