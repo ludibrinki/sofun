@@ -52,8 +52,8 @@ Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir gena
 
 Logische Operationen | Mathematische Operationen
 ------------ | -------------
-"<" (Kleiner als) | "+" (plus)
-"=" (ist gleich) | "-" (minus)			  
-"\|" (oder) | "\*" (mal)			      
-"&" (und) | "/" (geteilt)				      
-"~" (nicht) | "%" (modulo)
+< (Kleiner als) | + (plus)
+= (ist gleich) | - (minus)			  
+\| (oder) | \* (mal)			      
+& (und) | / (geteilt)				      
+~ (nicht) | % (modulo)
