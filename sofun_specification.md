@@ -23,7 +23,7 @@ im mainstack erscheint. Das funktionale Prinzip, dass Funktionen beim selben Inp
 output returnen müssen, ist so auch in SOFUNLANG gewährleistet und auch SOFUNLANG beruht
 vollständig auf Funktionen: Die Sprache funktional zu nennen ist also trotz der schwachen Typisierung berechtigt.
 
-SOFUNLANG wird in reverse polish notation geschrieben, d.h. 2 + 3 wird in SOFUNLANG "3 2 +" 
+SOFUNLANG wird in reverse polish notation geschrieben, d.h. `2 + 3` wird in SOFUNLANG `3 2 +` 
 geschrieben. VORSICHT! Das erste Argument der Funktion ist (da in Reihenfolge vom mainstack gepopt wird) das der Funktion 
 nächste, also das rechteste, nicht das linkeste. Darauf sollte für guten Stil auch bei eigenen Funktionen geachtet
 werden.
