@@ -1,4 +1,4 @@
-# SOFUNLANG -- a Stack-Oriented FUNctional LANGuage
+# SOFUNLANG - a Stack-Oriented FUNctional LANGuage
 
 KOMPILIEREN MIT g++ -o sfrepl sofunrepl.cpp -lstdc++ -std=c++11
 
