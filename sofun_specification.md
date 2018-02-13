@@ -40,7 +40,7 @@ Wollen wir eine Funktion für alle Potenzen definieren tun wir das also mit;
 Hier wird solange base mit sich selbst multipliziert, bis exp, von dem bei jeder 
 Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir genau exp mal.
 
-# Built-in-Funktionen
+## Built-in-Funktionen
 
 Logische Operationen:		
 
