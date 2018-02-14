@@ -48,7 +48,7 @@ Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir gena
 
 Logische Operationen | Mathematische Operationen
 ------------ | -------------
-< (leiner als) | + (plus)
+< (kleiner als) | + (plus)
 \> (größer als) | - (minus)			  
 = (ist gleich) | \* (mal)			      
 \| (oder) | / (geteilt)				      
