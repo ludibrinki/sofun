@@ -82,7 +82,7 @@ stack bi_condition(stack line, long stack_pointer, string operation) { //built-i
 		return empty_stack;
 	}
 	stack args;
-	for (int i = arg_num; i>=0; i--) {
+	for (int i = arg_num; i>=1; i--) {
 		args.push_back(line[stack_pointer-i]);
 		if (!is_numeric(line[stack_pointer-i])) {
 			cout << "wrong arguments for function " << desplit(args) << stack_pointer << endl;
