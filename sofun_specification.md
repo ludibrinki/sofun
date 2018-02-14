@@ -64,3 +64,13 @@ Die Repl hat zusätzlich zu den reinen Sprachbefehlen noch einige andere Befehle
 :load oder :l lässt dich files laden. Die darin deklarierten Funktionen sind daraufhin in der REPL verfügbar.
 
 :debug oder :d lässt dich durch viel, viel output den Interpretierprozess nachvollziehen. Im Normalfall hoffentlich nur für den Entwichkler interessant
+
+## Struktur eines Programms:
+
+Ein Programm in SOFUNLANG besteht also aus folgendem:
+
+- Ein Mainstack: Ein einfacher Stack. Hier werden definierte Funktionen mit Argumenten aufgerufen und mit RPN evaluiert. Beispiel: `2 3 +` evaluiert zu 5. 
+- Beliebig viele Funktionen. Hier ist zwischen verschiedenen Typen zu unterscheiden:
+  - Namen: Die einfachste Funktion ist einfach, einem Stack einen Namen zu geben. Beispiel: `c : 2 3 +`. Ruft man diesen Namen mit `c` auf, wird er `5` zurückgeben. *Formal:* `Name : Stack` 
+  - Einfache Funktionen: Diese Funktionen nehmen Argumente, die vom Hauptstack gepopt werden. Beispiel `a b c : a b +`. Ruft man diese Funktion mit zwei Argumenten auf (`2 3 c`) gibt sie 5 zurück. *Formal:* `Argument_n ... Argument_1 Name : Stack`
+  - Verzweigte Funktionen: Diese Funktionen haben abhängig von ihrern Argumenten unterschiedliche Arten, den Rückgabewert zu berechnen. Das wird vor allem bei rekursiven Funktionen wichtig, ermöglich aber Beispielsweise auch schon die Definition von der "kleiner gleich"-Funktion in der Standardbibliothek: `a b <= ? a b < : 1 ? a b = : 1 ? 0`. *Formal:* `Argument_n ... Argument_1 Name ? Bedingung_1 : Stack ... ? Bedingung_n : Stack ? Stack`
