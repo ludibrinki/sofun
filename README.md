@@ -6,3 +6,6 @@ Just to get an idea of the syntax: the following is the solution of the first ta
     
 The above function gives you the correct result, when executed as "1 sums". 
 As you see, due to reverse polish notation SOFun's code isn't really readable. Then again, all of it's syntax just consists of ':'s and '?'s: no braces, no semicolons, no keywords. Just two symbols and a few built-in functions that behave exactly the same as any other function you could write yourself.
+
+You can compile the source with "g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11".
+
