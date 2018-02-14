@@ -55,7 +55,7 @@ Logische Operationen | Mathematische Operationen
 & (und) | % (modulo)
 ~ (nicht) |
 
-##Die REPL
+## Die REPL
 Die Repl hat zusätzlich zu den reinen Sprachbefehlen noch einige andere Befehle, diese werden mit einem Doppelpunkt eingeleitet:
 
 
