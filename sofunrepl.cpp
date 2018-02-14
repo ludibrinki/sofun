@@ -8,8 +8,23 @@
 #include <algorithm>
 #include <utility>
 #include <fstream>
+#include <readline/readline.h>
+#include <readline/history.h>
+//compile with g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11
+
+//-------------------------------------------------noise
+static char *line_read = (char *)NULL; //warum, C?
+char * rl_gets () { //basic functionality of the readline library, copied from it's website
+  if (line_read) {
+      free (line_read);
+      line_read = (char *)NULL;
+    }
+  line_read = readline("sofun>: ");
+  if (line_read && *line_read) add_history(line_read);
+  return (line_read);
+}
+
 using namespace std;
-//compile with g++ -o sfrepl sofunrepl.cpp -lstdc++ -std=c++11
 
 //----------------------------------------------------defs
 typedef vector<string> stack; //Ein Stack ist ein vector von Strings. Ein echter Stack wäre für die REPL-Funktionen unpraktisch gewesen ;)
@@ -22,6 +37,7 @@ bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
 
 //----------------------------------------------------misc
+
 bool is_numeric(string inp_string, bool with_digits = false) {
 	if (inp_string.size() < 1) return true;
 	char head = inp_string.back(); inp_string.pop_back();
@@ -231,15 +247,12 @@ bool parse_command(string line) {
 	return false;
 }
 
-
 //--------------------------------------------------------main
 int main(int argc,  char** argv) {
-	string inp_line;
 	stack inp_stack; stack outp_stack;
-	for (;;) { //Endlosschleife
-		cout << "sofunrepl0.2 >: ";
-		getline(cin, inp_line); 
-		
+	for (;;) { //Endlosschleife 
+		rl_gets();
+		string inp_line = line_read;
 		if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
 			if (parse_command(inp_line)) break;
 		} else { //wenn es ein Ausdruck der Sprache ist
@@ -248,5 +261,7 @@ int main(int argc,  char** argv) {
 			cout << desplit(outp_stack) << "\n";
 		}
 	}
+	free (line_read); //ich hasse C
+	line_read = (char *)NULL; //ich hasse es wirklich
 }
 
