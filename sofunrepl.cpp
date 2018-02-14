@@ -22,11 +22,12 @@ bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
 
 //----------------------------------------------------misc
-bool is_numeric(string inp_string) {
+bool is_numeric(string inp_string, bool with_digits = false) {
 	if (inp_string.size() < 1) return true;
 	char head = inp_string.back(); inp_string.pop_back();
-	if (isdigit(head)) return is_numeric(inp_string);
-	else return false;
+	if (with_digits && head == '-' && inp_string.size() < 1) return true;
+	else if (isdigit(head)) return is_numeric(inp_string, true);
+	return false;
 }
 
 stack split(string inp_string) { //funktion wie das python split()
@@ -50,12 +51,12 @@ string desplit(stack inp_vector) { //pythons join()
 }
 
 //----------------------------------------------------built-ins
-stack bi_math(stack line, long stack_pointer, string operation) {
+stack bi_math(stack line, long stack_pointer, string operation) { //built-in math functions
 	if (stack_pointer<2) {
 		cout << "not enough arguments for function " << operation << endl;
 		return empty_stack;
 	}
-	string arg1 = line[stack_pointer-1]; string arg2 = line[stack_pointer-2];
+	string arg1 = line[stack_pointer-2]; string arg2 = line[stack_pointer-1];
 	if (!is_numeric(arg1) || !is_numeric(arg2)) {
 		cout << "wrong arguments for function " << arg1 << " " << arg2 << " " << stack_pointer << endl;
 		return empty_stack;
@@ -72,7 +73,7 @@ stack bi_math(stack line, long stack_pointer, string operation) {
 	return line;
 }
 
-stack bi_condition(stack line, long stack_pointer, string operation) {
+stack bi_condition(stack line, long stack_pointer, string operation) { //built-in compare functions
 	int arg_num;
 	if (operation=="~") arg_num = 1;
 	else arg_num = 2;
@@ -81,7 +82,7 @@ stack bi_condition(stack line, long stack_pointer, string operation) {
 		return empty_stack;
 	}
 	stack args;
-	for (int i = 1; i<=arg_num; i++) {
+	for (int i = arg_num; i>=0; i--) {
 		args.push_back(line[stack_pointer-i]);
 		if (!is_numeric(line[stack_pointer-i])) {
 			cout << "wrong arguments for function " << desplit(args) << stack_pointer << endl;
