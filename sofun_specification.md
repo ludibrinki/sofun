@@ -24,11 +24,7 @@ output returnen müssen, ist so auch in SOFUNLANG gewährleistet und auch SOFUNL
 vollständig auf Funktionen: Die Sprache funktional zu nennen ist also trotz der schwachen Typisierung berechtigt.
 
 SOFUNLANG wird in reverse polish notation geschrieben, d.h. `2 + 3` wird in SOFUNLANG `3 2 +` 
-geschrieben. VORSICHT! Das erste Argument der Funktion ist (da in Reihenfolge vom mainstack gepopt wird) das der Funktion 
-nächste, also das rechteste, nicht das linkeste. Darauf sollte für guten Stil auch bei eigenen Funktionen geachtet
-werden.
-Eine zweite Folge von RPN ist, dass jeder Token der Sprache, sowohl Funktionen als auch einfache Werte, durch Leerzeichen
-voneinander getrennt sein müssen.
+geschrieben. Eine Folge von RPN ist, dass jeder Token der Sprache, sowohl Funktionen als auch einfache Werte, durch Leerzeichen voneinander getrennt sein müssen.
 
 Funktionen werden mit ":" deklariert. Eine Funktion, die eine Zahl im Quadrat zurückgibt, schreibt
 man also: 
