@@ -54,3 +54,13 @@ Logische Operationen | Mathematische Operationen
 \| (oder) | / (geteilt)				      
 & (und) | % (modulo)
 ~ (nicht) |
+
+##Die REPL
+Die Repl hat zusätzlich zu den reinen Sprachbefehlen noch einige andere Befehle, diese werden mit einem Doppelpunkt eingeleitet:
+
+
+:quit oder :q verlässt die REPL.
+
+:load oder :l lässt dich files laden. Die darin deklarierten Funktionen sind daraufhin in der REPL verfügbar.
+
+:debug oder :d lässt dich durch viel, viel output den Interpretierprozess nachvollziehen. Im Normalfall hoffentlich nur für den Entwichkler interessant
