@@ -13,7 +13,7 @@ Haben wir einen Stack
 	1 2 3 a
 	
 wobei a eine Funktion ist, die zwei Argumente nimmt und sie 
-in umgekehrter Reihenfolge zurückgibt (e2 e1 a : e1 e2), wird der Stack danach folgendermaßen
+in umgekehrter Reihenfolge zurückgibt (e1 e2 a : e2 e1), wird der Stack danach folgendermaßen
 aussehen: 
 
 	1 3 2
@@ -23,7 +23,7 @@ im mainstack erscheint. Das funktionale Prinzip, dass Funktionen beim selben Inp
 output returnen müssen, ist so auch in SOFUNLANG gewährleistet und auch SOFUNLANG beruht
 vollständig auf Funktionen: Die Sprache funktional zu nennen ist also trotz der schwachen Typisierung berechtigt.
 
-SOFUNLANG wird in reverse polish notation geschrieben, d.h. `2 + 3` wird in SOFUNLANG `3 2 +` 
+SOFUNLANG wird in reverse polish notation geschrieben, d.h. `2 + 3` wird in SOFUNLANG `2 3 +` 
 geschrieben. Eine Folge von RPN ist, dass jeder Token der Sprache, sowohl Funktionen als auch einfache Werte, durch Leerzeichen voneinander getrennt sein müssen.
 
 Funktionen werden mit ":" deklariert. Eine Funktion, die eine Zahl im Quadrat zurückgibt, schreibt
@@ -39,7 +39,7 @@ keine der vorherigen Konditionen zutrifft. Dieses letzte Fragezeichen ist Pflich
 Rückgabewert besitzen muss. Es kann allerdings ein leerer Stack zurückgegeben werden.
 Wollen wir eine Funktion für alle Potenzen definieren tun wir das also mit:
 
-	exp base ^ ? 1 exp < : 1 ? base 1 exp - base ^ *
+	exp base ^ ? 1 exp < : 1 ? base exp 1 - base ^ *
 	
 Hier wird solange base mit sich selbst multipliziert, bis exp, von dem bei jeder 
 Rekursionsstufe 1 abgezogen wird, kleiner als 1 wird. So multiplizieren wir genau exp mal.
