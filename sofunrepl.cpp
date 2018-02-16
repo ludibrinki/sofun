@@ -183,8 +183,8 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 	for (long i = 0; i < fun_stack.size(); i++) { //dann iteriere über den tail
 			if (args.find(fun_stack[i]) != args.end()) fun_stack[i]=args[fun_stack[i]]; //und ersetze die Argumente mit ihren Werten
 	}
-	if (debug_mode) cout << desplit(fun_stack) << endl;
-	stack::iterator question_mark = find(fun_stack.begin(), fun_stack.end(), "?"); //ist es ein verzweigter Stack, wo ist das otherwise?
+	if (debug_mode) cout << "... " << desplit(fun_stack) << endl;
+	stack::iterator question_mark = find(fun_stack.begin(), fun_stack.end(), "?"); //ist es ein verzweigter Stack?
 	if (question_mark != fun_stack.end()) { //wenn es ein Fragezeichenzeichen gibt, es also ein verzweigter Stack ist
 		vector<stack> branch;
 		long last_found = 0;
@@ -195,9 +195,10 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 				stack branch_tail;
 				if (fun_sign != fun_stack.end()) branch_tail.insert(branch_tail.begin(), fun_sign+1, fun_stack.begin()+i);
 				else branch_tail.insert(branch_tail.begin(), fun_stack.begin()+last_found+1, fun_stack.end());
-				if (debug_mode) cout << "if " << desplit(branch_head) << "then " << desplit(branch_tail) << endl;
+				if (debug_mode) cout << fun_stack.size() << " if " << desplit(branch_head) << "then " << desplit(branch_tail) << endl;
 				if (i == fun_stack.size() || parse_condition(branch_head)) { //wenn die branch-condition zutriffz, für den branch_stack aus
 					fun_stack = evaluate(branch_tail);
+					break;
 				}
 				last_found = i;
 			}
@@ -208,6 +209,7 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 	}
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
+	if (debug_mode) cout << "returning " << desplit(line) << endl;
 	return line;
 }
 
