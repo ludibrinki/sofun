@@ -46,6 +46,8 @@ bool is_numeric(string inp_string, bool with_digits = false) {
 	return false;
 }
 
+bool is_stack(string inp_string) {return inp_string[0]=='(' && inp_string.size()>1;}
+
 stack split(string inp_string) { //funktion wie das python split()
 	if (inp_string.size()<1) {stack ret_vector {}; return ret_vector;} //rekursionsabbruchbedingung
 	char head = inp_string.back(); inp_string.pop_back(); //pop
@@ -64,6 +66,25 @@ string desplit(stack inp_vector) { //pythons join()
 	if (inp_vector.size()<1) return "";
 	string identifier=inp_vector.back(); inp_vector.pop_back();
 	return desplit(inp_vector)+identifier+" "; //rekursion
+}
+
+string pop_stack(string stack_string) {return split(stack_string)[1];}
+
+string popped_stack(string stack_string) {
+	stack extracted_stack = split(stack_string);
+	extracted_stack.erase(extracted_stack.begin()+1);
+	return desplit(extracted_stack);
+}
+
+string is_empty_stack(string stack_string) {
+	if (split(stack_string).size()<=2) return "1";
+	else return "0";
+}
+
+string push_stack(string stack_string, string to_push) {
+	stack extracted_stack = split(stack_string);
+	extracted_stack.insert(extracted_stack.begin()+1, to_push);
+	return desplit(extracted_stack);
 }
 
 //----------------------------------------------------built-ins
@@ -90,9 +111,8 @@ stack bi_math(stack line, long stack_pointer, string operation) { //built-in mat
 }
 
 stack bi_condition(stack line, long stack_pointer, string operation) { //built-in compare functions
-	int arg_num;
+	int arg_num = 2;
 	if (operation=="~") arg_num = 1;
-	else arg_num = 2;
 	if (stack_pointer<arg_num) {
 		cout << "not enough arguments for function " << operation << endl;
 		return empty_stack;
@@ -118,6 +138,31 @@ stack bi_condition(stack line, long stack_pointer, string operation) { //built-i
 	return line;
 }
 
+stack bi_stack(stack line, long stack_pointer, string operation) { //built-in stack functions
+	int arg_num = 1;
+	if (operation=="push") arg_num = 2;
+	if (stack_pointer<arg_num) {
+		cout << "not enough arguments for function " << operation << endl;
+		return empty_stack;
+	}
+	stack args;
+	for (int i = arg_num; i>=1; i--) {
+		if ((i == arg_num && !is_stack(line[stack_pointer-i])) || (i != arg_num && !is_numeric(line[stack_pointer-i]))) {
+			cout << "wrong arguments for function " << desplit(args) << stack_pointer << endl;
+			return empty_stack;
+		} else args.push_back(line[stack_pointer-i]);
+	}	
+	string result;
+	if (operation == "pop") result = pop_stack(args[0]);
+	else if (operation == "popped") result = popped_stack(args[0]);
+	else if (operation == "is_empty") result = is_empty_stack(args[0]);
+	else if (operation == "push") result = push_stack(args[0], args[1]);
+	else cout << "something went awfully wrong" << endl;
+	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
+	line.insert(line.begin()+stack_pointer-arg_num, result);
+	return line;
+}
+
 //-------------------------------------------------------core
 stack parse_function(stack, long, string); //macht Funktion zu evaluierbarem Stack
 
@@ -127,6 +172,20 @@ stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (füh
 	string token = line[stack_pointer];
 	if (is_numeric(token)) {
 		if (debug_mode) cout << "numeric " << token << endl;
+		stack_pointer += 1;
+	} else if (token[0] == '(') { //wenn im main stack ein weiterer Stack liegt
+		if (token.size() == 1) { //wenns nur die Klammer ist
+			stack::iterator stack_end = find(line.begin(), line.end(), ")"); //wo ist das Ende
+			if (stack_end != line.end()) { //wenns eine schließende Klammer gibt, tausche den Abschnitt mit einem String vom Abschnitt
+				stack inner_stack (line.begin()+stack_pointer, stack_end+1);
+				string inner_stack_string = desplit(inner_stack);
+				line.erase(line.begin()+stack_pointer, stack_end+1);
+				line.insert(line.begin()+stack_pointer, inner_stack_string);
+			} else {
+				cout << "opening brace without closing in " << desplit(line);
+				return empty_stack;
+			}
+		}
 		stack_pointer += 1;
 	} else if (funs.find(token) != funs.end()) { //wenn der token eine bekannte Funktion ist
 		if (debug_mode) cout << "known function " << token << endl;
@@ -138,6 +197,8 @@ stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (füh
 			line = bi_math(line, stack_pointer, token);
 		else if (token == "<" || token == "=" || token == ">" || token == "|" || token == "&" || token == "~") 
 			line = bi_condition(line, stack_pointer, token);
+		else if (token == "pop" || token == "push" || token == "is_empty" || token == "popped")
+			line = bi_stack(line, stack_pointer, token);
 		else {
 			cout << "unexpected token " << token << endl;
 			return empty_stack;
@@ -150,7 +211,7 @@ stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (füh
 bool parse_condition(stack condition) {
 	if (debug_mode) cout << "parsing condition " << desplit(condition) << endl;
 	stack result = evaluate(condition);
-	if (result.size()>1) {
+	if (result.size() > 1) {
 		cout << "Warning: Condition evaluates to a stack with multiple elements: " << desplit(condition) << endl;
 		return true;
 	} else if (result.size()<1) {
@@ -197,15 +258,13 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 				else branch_tail.insert(branch_tail.begin(), fun_stack.begin()+last_found+1, fun_stack.end());
 				if (debug_mode) cout << fun_stack.size() << " if " << desplit(branch_head) << "then " << desplit(branch_tail) << endl;
 				if (i == fun_stack.size() || parse_condition(branch_head)) { //wenn die branch-condition zutriffz, für den branch_stack aus
-					fun_stack = evaluate(branch_tail);
+					fun_stack = branch_tail;
 					break;
 				}
 				last_found = i;
 			}
 		}
 		
-	} else { //wenn es kein verzweigter Stack ist
-		fun_stack = evaluate(fun_stack);
 	}
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
