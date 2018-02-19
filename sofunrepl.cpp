@@ -292,7 +292,7 @@ stack parse(stack line, bool execute = false) { //syntaktische Analyse (Funktion
 			for (int i = 0; i<main_args.size(); i++) {
 				args_line.push_back(main_args[i]);
 			}
-			args_line.insert(args_line.end(), fun_tail.begin(), fun_tail.end()); //und dem tail von main
+			args_line.push_back("main"); //und dem tail von main
 			cout << desplit(evaluate(args_line)) << endl;
 		} 
 		return empty_stack;
