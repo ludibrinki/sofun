@@ -29,12 +29,14 @@ using namespace std;
 //----------------------------------------------------defs
 typedef vector<string> stack; //Ein Stack ist ein vector von Strings. Ein echter Stack wäre für die REPL-Funktionen unpraktisch gewesen ;)
 typedef pair<stack, stack> fun; //eine funktion ist ein Paar aus ihren Argumenten und dem Stack
+typedef pair<long, stack> line_pair;
 
 
 //----------------------------------------------------global vars
 map<string, fun> funs;  //hier werden die Funktionen unter ihren Namen abgespeichert
 bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
+line_pair empty_pair (0,empty_stack); //wird bei error zurückgegeben
 stack main_args {};
 
 //----------------------------------------------------misc
@@ -143,15 +145,15 @@ string push_stack(string stack_string, string to_push) {
 }
 
 //----------------------------------------------------built-ins
-stack bi_math(stack line, long stack_pointer, string operation) { //built-in math functions
+line_pair bi_math(stack line, long stack_pointer, string operation) { //built-in math functions
 	if (stack_pointer<2) {
 		cout << "not enough arguments for function " << operation << endl;
-		return empty_stack;
+		return empty_pair;
 	}
 	string arg1 = line[stack_pointer-2]; string arg2 = line[stack_pointer-1];
 	if (!is_numeric(arg1) || !is_numeric(arg2)) {
 		cout << "wrong arguments for function " << operation << arg1 << " " << arg2 << " " << endl;
-		return empty_stack;
+		return empty_pair;
 	}
 	long result = 0;
 	if (operation == "+") result = stol(arg1) + stol(arg2);
@@ -162,22 +164,23 @@ stack bi_math(stack line, long stack_pointer, string operation) { //built-in mat
 	else cout << "something went awfully wrong" << endl;
 	line.erase(line.begin()+stack_pointer-2, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-2, to_string(result));
-	return line;
+	line_pair ret_pair (stack_pointer-2, line);
+	return ret_pair;
 }
 
-stack bi_condition(stack line, long stack_pointer, string operation) { //built-in compare functions
+line_pair bi_condition(stack line, long stack_pointer, string operation) { //built-in compare functions
 	int arg_num = 2;
 	if (operation=="~") arg_num = 1;
 	if (stack_pointer<arg_num) {
 		cout << "not enough arguments for function " << operation << endl;
-		return empty_stack;
+		return empty_pair;
 	}
 	stack args;
 	for (int i = arg_num; i>=1; i--) {
 		args.push_back(line[stack_pointer-i]);
 		if (!is_numeric(line[stack_pointer-i])) {
 			cout << "wrong arguments for function " << operation << desplit(args) << endl;
-			return empty_stack;
+			return empty_pair;
 		}
 	}	
 	long result = 0;
@@ -190,21 +193,22 @@ stack bi_condition(stack line, long stack_pointer, string operation) { //built-i
 	else cout << "something went awfully wrong" << endl;
 	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-arg_num, to_string(result));
-	return line;
+	line_pair ret_pair (stack_pointer-arg_num, line);
+	return ret_pair;
 }
 
-stack bi_stack(stack line, long stack_pointer, string operation) { //built-in stack functions
+line_pair bi_stack(stack line, long stack_pointer, string operation) { //built-in stack functions
 	int arg_num = 1;
 	if (operation=="push") arg_num = 2;
 	if (stack_pointer<arg_num) {
 		cout << "not enough arguments for function " << operation << endl;
-		return empty_stack;
+		return empty_pair;
 	}
 	stack args;
 	for (int i = arg_num; i>=1; i--) {
 		if (i == arg_num && !is_stack(line[stack_pointer-i])) {
 			cout << "wrong arguments for function " << operation << desplit(args) << endl;
-			return empty_stack;
+			return empty_pair;
 		} else args.push_back(line[stack_pointer-i]);
 	}	
 	string result;
@@ -215,14 +219,16 @@ stack bi_stack(stack line, long stack_pointer, string operation) { //built-in st
 	else cout << "something went awfully wrong" << endl;
 	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-arg_num, result);
-	return line;
+	line_pair ret_pair (stack_pointer-arg_num, line);
+	return ret_pair;
 }
 
 //-------------------------------------------------------core
-stack parse_function(stack, long, string); //macht Funktion zu evaluierbarem Stack
+line_pair parse_function(stack, long, string); //macht Funktion zu evaluierbarem Stack
 void eval_file(string, bool);
 
 stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (führt Funktionen aus)
+	line_pair ret_pair = empty_pair;
 	if (debug_mode) cout << "evaluating " << desplit(line) << endl;
 	if (stack_pointer >= line.size()) return line; 
 	string token = line[stack_pointer];
@@ -234,21 +240,21 @@ stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (füh
 		stack_pointer += 1;
 	} else if (funs.find(token) != funs.end()) { //wenn der token eine bekannte Funktion ist
 		if (debug_mode) cout << "known function " << token << endl;
-		line = parse_function(line, stack_pointer, token);
-		stack_pointer = 0;
+		ret_pair = parse_function(line, stack_pointer, token);
+		stack_pointer = ret_pair.first; line = ret_pair.second;
 	} else { //sonst built-in-funktion oder unexpected identifier
 		if (debug_mode) cout << "built-in or unknown " << token << endl;
 		if (token == "+" || token == "-" || token == "*" || token == "/" || token == "%") 
-			line = bi_math(line, stack_pointer, token);
+			ret_pair = bi_math(line, stack_pointer, token);
 		else if (token == "<" || token == "=" || token == ">" || token == "|" || token == "&" || token == "~") 
-			line = bi_condition(line, stack_pointer, token);
+			ret_pair = bi_condition(line, stack_pointer, token);
 		else if (token == "pop" || token == "push" || token == "is_empty" || token == "popped")
-			line = bi_stack(line, stack_pointer, token);
+			ret_pair = bi_stack(line, stack_pointer, token);
 		else {
 			cout << "unexpected token " << token << endl;
 			return empty_stack;
 		}
-		stack_pointer = 0;
+		stack_pointer = ret_pair.first; line = ret_pair.second;
 	}
 	return evaluate(line, stack_pointer);
 }
@@ -271,7 +277,7 @@ bool parse_condition(stack condition) {
 	return false;
 }
 
-stack parse_function(stack line, long stack_pointer, string fun_name) {
+line_pair parse_function(stack line, long stack_pointer, string fun_name) {
 	if (debug_mode) cout << "parsing function " << desplit(line) << endl;
 	fun called_fun = funs[fun_name];
 	stack arg_names = called_fun.first;
@@ -280,7 +286,7 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 	long args_num = arg_names.size();
 	if (stack_pointer < args_num) {
 		cout << "not enough arguments for function " << fun_name << endl;
-		return empty_stack;
+		return empty_pair;
 	}
 	map<string, string> args; //map für Namen und tatsächliche Werte der Argumente
 	for (long i = 1; i <= args_num; i++) { 
@@ -314,7 +320,8 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
 	if (debug_mode) cout << "returning " << desplit(line) << endl;
-	return line;
+	line_pair ret_pair (stack_pointer-args_num, line);
+	return ret_pair;
 }
 
 stack parse(stack line, bool execute = false) { //syntaktische Analyse (Funktionsdeklaration oder evaluierbarer Stack?)
