@@ -69,21 +69,68 @@ string desplit(stack inp_vector) { //pythons join()
 	return desplit(inp_vector)+identifier+" "; //rekursion
 }
 
-string pop_stack(string stack_string) {return split(stack_string)[1];}
+long find_closing_bracket(stack line, long stack_pointer, stack brackets = empty_stack) {
+	if (stack_pointer >= line.size()) return line.size();
+	if (line[stack_pointer] == "(") brackets.push_back(line[stack_pointer]);
+	else if (line[stack_pointer] == ")") brackets.pop_back();
+	if (brackets.size() == 0) return stack_pointer;
+	return find_closing_bracket(line, stack_pointer+1, brackets);
+}
+
+stack make_stack_string(stack line, long stack_pointer) {
+	if (line[stack_pointer] == "()") cout << "no space between brackets of empty stack " << desplit(line);
+	else if (line[stack_pointer].size() == 1) { //wenns nur die Klammer ist
+		long stack_end = find_closing_bracket(line, stack_pointer); //wo ist das Ende
+		if (stack_end < line.size()) {
+			stack inner_stack (line.begin()+stack_pointer, line.begin()+stack_end+1);
+			string inner_stack_string = desplit(inner_stack);
+			inner_stack_string.erase(inner_stack_string.end()-1);
+			line.erase(line.begin()+stack_pointer, line.begin()+stack_end+1);
+			line.insert(line.begin()+stack_pointer, inner_stack_string);
+		} else {
+			cout << "opening bracket without closing one " << desplit(line);
+			return empty_stack;
+		}
+		return line;
+	} 
+	return line;
+}
+
+string is_empty_stack(string stack_string) {
+	if (split(stack_string).size() <= 2) return "1";
+	else return "0";
+}
+
+string pop_stack(string stack_string) {
+	stack extracted_stack = split(stack_string);
+	if (extracted_stack.size() <= 2) return "";
+	for (long i = 1; i < extracted_stack.size(); i++) {
+		if (extracted_stack[i][0] == '(') {
+			extracted_stack = make_stack_string(extracted_stack, i);
+		}
+	}
+	return extracted_stack[1];
+}
 
 string popped_stack(string stack_string) {
 	stack extracted_stack = split(stack_string);
+	if (extracted_stack.size() <= 2) cout << "can't pop empty stack";
+	for (long i = 1; i < extracted_stack.size(); i++) {
+		if (extracted_stack[i][0] == '(') {
+			extracted_stack = make_stack_string(extracted_stack, i);
+		}
+	}
 	extracted_stack.erase(extracted_stack.begin()+1);
 	return desplit(extracted_stack);
 }
 
-string is_empty_stack(string stack_string) {
-	if (split(stack_string).size()<=2) return "1";
-	else return "0";
-}
-
 string push_stack(string stack_string, string to_push) {
 	stack extracted_stack = split(stack_string);
+	for (long i = 1; i < extracted_stack.size(); i++) {
+		if (extracted_stack[i][0] == '(') {
+			extracted_stack = make_stack_string(extracted_stack, i);
+		}
+	}
 	extracted_stack.insert(extracted_stack.begin()+1, to_push);
 	return desplit(extracted_stack);
 }
@@ -96,7 +143,7 @@ stack bi_math(stack line, long stack_pointer, string operation) { //built-in mat
 	}
 	string arg1 = line[stack_pointer-2]; string arg2 = line[stack_pointer-1];
 	if (!is_numeric(arg1) || !is_numeric(arg2)) {
-		cout << "wrong arguments for function " << arg1 << " " << arg2 << " " << stack_pointer << endl;
+		cout << "wrong arguments for function " << operation << arg1 << " " << arg2 << " " << endl;
 		return empty_stack;
 	}
 	long result = 0;
@@ -122,7 +169,7 @@ stack bi_condition(stack line, long stack_pointer, string operation) { //built-i
 	for (int i = arg_num; i>=1; i--) {
 		args.push_back(line[stack_pointer-i]);
 		if (!is_numeric(line[stack_pointer-i])) {
-			cout << "wrong arguments for function " << desplit(args) << stack_pointer << endl;
+			cout << "wrong arguments for function " << operation << desplit(args) << endl;
 			return empty_stack;
 		}
 	}	
@@ -148,8 +195,8 @@ stack bi_stack(stack line, long stack_pointer, string operation) { //built-in st
 	}
 	stack args;
 	for (int i = arg_num; i>=1; i--) {
-		if ((i == arg_num && !is_stack(line[stack_pointer-i])) || (i != arg_num && !is_numeric(line[stack_pointer-i]))) {
-			cout << "wrong arguments for function " << desplit(args) << stack_pointer << endl;
+		if (i == arg_num && !is_stack(line[stack_pointer-i])) {
+			cout << "wrong arguments for function " << operation << desplit(args) << endl;
 			return empty_stack;
 		} else args.push_back(line[stack_pointer-i]);
 	}	
@@ -176,18 +223,7 @@ stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (füh
 		if (debug_mode) cout << "numeric " << token << endl;
 		stack_pointer += 1;
 	} else if (token[0] == '(') { //wenn im main stack ein weiterer Stack liegt
-		if (token.size() == 1) { //wenns nur die Klammer ist
-			stack::iterator stack_end = find(line.begin(), line.end(), ")"); //wo ist das Ende
-			if (stack_end != line.end()) { //wenns eine schließende Klammer gibt, tausche den Abschnitt mit einem String vom Abschnitt
-				stack inner_stack (line.begin()+stack_pointer, stack_end+1);
-				string inner_stack_string = desplit(inner_stack);
-				line.erase(line.begin()+stack_pointer, stack_end+1);
-				line.insert(line.begin()+stack_pointer, inner_stack_string);
-			} else {
-				cout << "opening brace without closing in " << desplit(line);
-				return empty_stack;
-			}
-		}
+		line = make_stack_string(line, stack_pointer);
 		stack_pointer += 1;
 	} else if (funs.find(token) != funs.end()) { //wenn der token eine bekannte Funktion ist
 		if (debug_mode) cout << "known function " << token << endl;
