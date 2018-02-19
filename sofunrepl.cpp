@@ -63,10 +63,11 @@ stack split(string inp_string) { //funktion wie das python split()
 	return ret_vector;
 }
 
-string desplit(stack inp_vector) { //pythons join()
-	if (inp_vector.size()<1) return "";
+string desplit(stack inp_vector, string ret = "") { //pythons join()
+	if (inp_vector.size()<1) return ret;
 	string identifier=inp_vector.back(); inp_vector.pop_back();
-	return desplit(inp_vector)+identifier+" "; //rekursion
+	ret = identifier+" "+ret;
+	return desplit(inp_vector, ret); //rekursion
 }
 
 long find_closing_bracket(stack line, long stack_pointer, stack brackets = empty_stack) {
@@ -97,7 +98,7 @@ stack make_stack_string(stack line, long stack_pointer) {
 }
 
 string is_empty_stack(string stack_string) {
-	if (split(stack_string).size() <= 0) return "1";
+	if (split(stack_string).size() <= 2) return "1";
 	else return "0";
 }
 
@@ -115,7 +116,10 @@ string pop_stack(string stack_string) {
 
 string popped_stack(string stack_string) {
 	stack extracted_stack = split(stack_string);
-	if (extracted_stack.size() <= 2) cout << "can't pop empty stack";
+	if (extracted_stack.size() <= 2) {
+		cout << "can't pop empty stack ";
+		return "( )";
+	}
 	for (long i = 1; i < extracted_stack.size(); i++) {
 		if (extracted_stack[i][0] == '(') {
 			extracted_stack = make_stack_string(extracted_stack, i);
