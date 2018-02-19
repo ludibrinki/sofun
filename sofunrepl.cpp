@@ -97,7 +97,7 @@ stack make_stack_string(stack line, long stack_pointer) {
 }
 
 string is_empty_stack(string stack_string) {
-	if (split(stack_string).size() <= 2) return "1";
+	if (split(stack_string).size() <= 0) return "1";
 	else return "0";
 }
 
@@ -109,7 +109,8 @@ string pop_stack(string stack_string) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
-	return extracted_stack[1];
+	extracted_stack.pop_back(); //Die Klammer
+	return extracted_stack.back();
 }
 
 string popped_stack(string stack_string) {
@@ -120,8 +121,9 @@ string popped_stack(string stack_string) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
-	extracted_stack.erase(extracted_stack.begin()+1);
-	return desplit(extracted_stack);
+	extracted_stack.pop_back(); //die Klammer
+	extracted_stack.pop_back();
+	return desplit(extracted_stack)+")";
 }
 
 string push_stack(string stack_string, string to_push) {
@@ -131,8 +133,9 @@ string push_stack(string stack_string, string to_push) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
-	extracted_stack.insert(extracted_stack.begin()+1, to_push);
-	return desplit(extracted_stack);
+	extracted_stack.pop_back(); //Die Klammer
+	extracted_stack.push_back(to_push);
+	return desplit(extracted_stack)+")";
 }
 
 //----------------------------------------------------built-ins
@@ -373,6 +376,7 @@ int main(int argc,  char** argv) {
 			if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
 				if (parse_command(inp_line)) break;
 			} else { //wenn es ein Ausdruck der Sprache ist
+				inp_stack.reserve(5000);
 				inp_stack = split(inp_line);
 				outp_stack = parse(inp_stack);
 				cout << desplit(outp_stack) << "\n";
