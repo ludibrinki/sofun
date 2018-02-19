@@ -35,6 +35,7 @@ typedef pair<stack, stack> fun; //eine funktion ist ein Paar aus ihren Argumente
 map<string, fun> funs;  //hier werden die Funktionen unter ihren Namen abgespeichert
 bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
+stack main_args {};
 
 //----------------------------------------------------misc
 
@@ -165,6 +166,7 @@ stack bi_stack(stack line, long stack_pointer, string operation) { //built-in st
 
 //-------------------------------------------------------core
 stack parse_function(stack, long, string); //macht Funktion zu evaluierbarem Stack
+void eval_file(string, bool);
 
 stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (führt Funktionen aus)
 	if (debug_mode) cout << "evaluating " << desplit(line) << endl;
@@ -272,7 +274,7 @@ stack parse_function(stack line, long stack_pointer, string fun_name) {
 	return line;
 }
 
-stack parse(stack line) { //syntaktische Analyse (Funktionsdeklaration oder evaluierbarer Stack?)
+stack parse(stack line, bool execute = false) { //syntaktische Analyse (Funktionsdeklaration oder evaluierbarer Stack?)
 	stack::iterator fun_sign = find(line.begin(), line.end(), ":"); //wo ist das Funktionszeichen
 	stack::iterator branched_fun_sign = find(line.begin(), line.end(), "?"); //oder das verzweigte Funktionszeichen
 	if (fun_sign == line.end() && branched_fun_sign == line.end()) line = evaluate(line); //wenn es eines gibt
@@ -285,41 +287,60 @@ stack parse(stack line) { //syntaktische Analyse (Funktionsdeklaration oder eval
 		fun new_fun (fun_args, fun_tail); //Das kommt in die map -> Argumente und der Funktionsschwanz
 		funs[fun_name] = new_fun; //Füge die Funktion zu den derzeitigen Funktionen hinzu
 		if (debug_mode) cout << fun_name << " head: " << desplit(fun_head) << "tail: " << desplit(fun_tail) << endl;
+		if (execute && fun_name == "main") { //wenns ein file ist und das die main funktion ist
+			stack args_line; //dann bauen wir eine line aus den cmd argumenten
+			for (int i = 0; i<main_args.size(); i++) {
+				args_line.push_back(main_args[i]);
+			}
+			args_line.insert(args_line.end(), fun_tail.begin(), fun_tail.end()); //und dem tail von main
+			cout << desplit(evaluate(args_line)) << endl;
+		} 
 		return empty_stack;
 	}
 	return line;
 }
 
-void eval_file(string name) {
+bool parse_command(string line) {
+	if (line[1] == 'q') return true;
+	if (line[1] == 'd') debug_mode = !debug_mode;
+	if (line[1] == 'l') eval_file(split(line)[1], false);
+	return false;
+}
+
+void eval_file(string name, bool execute = false) {
 	ifstream fun_file (name);
 	string line;
 	if (fun_file.is_open()) {
     while (getline(fun_file,line)) {
-		if (line[0]!='#') parse(split(line)); //wenns kein kommentar ist, führs aus
-    }
+		if (line.front() == ':') (parse_command(line));
+		else if (line[0]!='#') {
+			parse(split(line), execute); //wenns kein kommentar ist, führs aus
+		}
+	}
     fun_file.close();
   } else cout << "Unable to open file " << name << endl; 
 }
 
-bool parse_command(string line) {
-	if (line[1] == 'q') return true;
-	if (line[1] == 'd') debug_mode = !debug_mode;
-	if (line[1] == 'l') eval_file(split(line)[1]);
-	return false;
-}
-
 //--------------------------------------------------------main
 int main(int argc,  char** argv) {
-	stack inp_stack; stack outp_stack;
-	for (;;) { //Endlosschleife 
-		rl_gets();
-		string inp_line = line_read;
-		if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
-			if (parse_command(inp_line)) break;
-		} else { //wenn es ein Ausdruck der Sprache ist
-			inp_stack = split(inp_line);
-			outp_stack = parse(inp_stack);
-			cout << desplit(outp_stack) << "\n";
+	eval_file("std.fun"); //standard library ist standard
+	if (argc > 1) { 
+		for (int i = 2; i < argc; i++) {
+			main_args.push_back(argv[i]);
+		}
+		eval_file(argv[1], true); //file ausführen
+	} else { //REPL modus
+		stack inp_stack; stack outp_stack;
+		for (;;) { //Endlosschleife 
+			rl_gets();
+			string inp_line = line_read;
+			if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
+				if (parse_command(inp_line)) break;
+			} else { //wenn es ein Ausdruck der Sprache ist
+				inp_stack = split(inp_line);
+				outp_stack = parse(inp_stack);
+				cout << desplit(outp_stack) << "\n";
+			}
 		}
 	}
 	free (line_read); //ich hasse C
