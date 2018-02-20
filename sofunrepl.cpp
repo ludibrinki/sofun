@@ -52,25 +52,31 @@ bool is_numeric(string inp_string, bool with_digits = false) {
 bool is_stack(string inp_string) {return inp_string[0]=='(' && inp_string.size()>1;}
 
 stack split(string inp_string) { //funktion wie das python split()
-	if (inp_string.size()<1) {stack ret_vector {}; return ret_vector;} //rekursionsabbruchbedingung
-	char head = inp_string.back(); inp_string.pop_back(); //pop
-	string identifier = "";
-	while (head!=' ') { //schleife durch den String um den identifier bis zum leerzeichen zu erhalten
-		if (inp_string.size()<1) {identifier.insert(identifier.begin(), head); break;}
-		identifier.insert(identifier.begin(), head);
-		head = inp_string.back(); inp_string.pop_back(); //pop
+	stack ret_vector;
+	if (inp_string.size()<1) return ret_vector; //rekursionsabbruchbedingung
+	ret_vector.reserve(inp_string.size()/4);
+	long last_space = -1;
+	for (long i = 0; i <= inp_string.size(); i++) {
+		char x = inp_string[i];
+		if (x == ' ' || i == inp_string.size()) {
+			if (i-last_space > 1) {
+				string identifier (inp_string.begin()+last_space+1, inp_string.begin()+i);
+				ret_vector.push_back(identifier);
+			}
+			last_space = i;
+		}
 	}
-	stack ret_vector = split(inp_string); //Rekursion
-	if (identifier!="") ret_vector.push_back(identifier); //wenn es tatsächlich ein identifier ist, dann hänge ihn ran
 	return ret_vector;
 }
 
-string desplit(stack inp_vector, string ret = "") { //pythons join()
-	if (inp_vector.size()<1) return ret;
-	string identifier=inp_vector.back(); inp_vector.pop_back();
-	ret = identifier+" "+ret;
-	return desplit(inp_vector, ret); //rekursion
+string desplit(stack inp_vector) { //pythons join()
+	string ret = "";
+	for (long i = 0; i < inp_vector.size(); i++) {
+		ret += inp_vector[i]+" ";
+	}
+	return ret;
 }
+
 
 long find_closing_bracket(stack line, long stack_pointer, stack brackets = empty_stack) {
 	if (stack_pointer >= line.size()) return line.size();
@@ -387,7 +393,7 @@ int main(int argc,  char** argv) {
 			if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
 				if (parse_command(inp_line)) break;
 			} else { //wenn es ein Ausdruck der Sprache ist
-				inp_stack.reserve(5000);
+				inp_stack.reserve(500);
 				inp_stack = split(inp_line);
 				outp_stack = parse(inp_stack);
 				cout << desplit(outp_stack) << "\n";
