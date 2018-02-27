@@ -1,12 +1,5 @@
-# SOFUNLANG
-This repository contains my REPL for a stack-oriented functional language in reverse polish notation. The combination of these two means: minimal syntax without sacrifice - okay: human readability, maybe ;)
-Just to get an idea of the syntax: the following is the solution of the first task of projecteuler.net, "Find the sum of all the multiples of 3 or 5 below 1000.".
+# SOFUN
+  Sofun (Abk.: Stack-Oriented FUNctional language) ist in erster Linie eine stackorientierte Sprache: Alle Ausdrücke (d.h. Werte und Funktionen) werden vom Interpreter in Stacks aufgelöst und als einzige Datenstruktur stehen ebenfalls Stacks zur Verfügung. Funktionen können dabei als - teilweise argumentabhängige - Repräsentationen von Abschnitten des aufrufenden Stacks angesehen werden: Sie werden vom Interpreter, wie Inline-Funktionen in imperativen Sprachen, durch die repräsentierten Stacks ersetzt. Nach dem Parsing besteht also das ganze Programm aus einem einzigen Stack aus Elementarfunktionen - dem Mainstack. Dieser wird evaluiert und ergibt den Rückgabewert des Programms. \\ Obwohl die Sprache also einige Eigenschaften einer funktionalen Sprache teilt, kann man sie formal nicht rein funktional nennen. Auf diesen Umstand werde ich nach der syntaktischen Spezifikation noch genauer eingehen. Hier ein Beispiel des Syntaxs.
 
     num sums ? 1000 num = : 0 ? num 3 % ~ num 5 % ~ | : num num 1 + sums + ? num 1 + sums
-    
-The above function gives you the correct result, when executed as "1 sums". 
-As you see, due to RPN (reverse polish notation) SOFUNLANG's code needs no structuring syntax (apart from the function declaration). That's because RPN is a format, that can be fully parsed as a linear stack, without any nested brackets. All of it's syntax just consists of ':'s, '?'s, and opening and closing brackets if you need data stacks: no semicolons, no keywords. Just four symbols and a few built-in functions that behave exactly the same as any other function you could write yourself.
-See the language specification for further information about the language. 
-
-You can compile the source with "g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11".
 
