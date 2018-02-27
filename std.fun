@@ -15,11 +15,12 @@ base exp ^ ? exp 1 = : base ? base base exp 1 - ^ *
 a ! ? a 1 = : 1 ? a a 1 - ! *
 
 #stacks
-a f e foldl ? a is_empty : e ? a popped f e a pop f pop foldl 
+a f e foldl ? a is_empty : e ? a popped f e a pop f flatten foldl 
 a f map ? a is_empty : ( ) ? a popped f map a pop f flatten push
+a f filter ? a is_empty : ( ) ? a pop f flatten : a popped f filter a pop push ? a popped f filter
 a b eq_stack ? a size b size != : 0 ? a is_empty : 1 ? a pop b pop = a popped b popped eq_stack &  
 a n elem_at ? a is_empty : ? n 1 = : a pop ? a popped n 1 - elem
-a flatten ? a is_empty : ? a pop a popped flatten
+a flatten ? a is_empty : ? a popped flatten a pop
 a size ? a is_empty : 0 ? 1 a popped size +
 a last ? a size 1 = : a pop ? a popped last
 i n range ? i n = : ( ) ? i 1 + n range i push
@@ -32,3 +33,5 @@ a s e slice ? s 0 > : a popped s 1 - e 1 - slice ? e 0 <= : ( ) ? a popped s e 1
 sum : ( + ) 0 foldl
 a min_stack : a popped ( min ) a pop foldl
 a max_stack : a popped ( max ) a pop foldl
+a b concat_back ? b is_empty : a ? a b pop push b popped concat_back
+b concat : b reverse concat_back
