@@ -10,7 +10,9 @@
 #include <fstream>
 #include <readline/readline.h>
 #include <readline/history.h>
+
 //compile with g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11
+//compile with performance analysis with -pg and -no-pie and gprof sfrepl | gprof2dot -s -w | dot -Tpng -o output.png
 
 //-------------------------------------------------noise
 static char *line_read = (char *)NULL; //warum, C?
@@ -41,12 +43,13 @@ stack main_args {};
 
 //----------------------------------------------------misc
 
-bool is_numeric(string inp_string, bool with_digits = false) {
+bool is_numeric(string inp_string) {
 	if (inp_string.size() < 1) return true;
-	char head = inp_string.back(); inp_string.pop_back();
-	if (with_digits && head == '-' && inp_string.size() < 1) return true;
-	else if (isdigit(head)) return is_numeric(inp_string, true);
-	return false;
+	for (int i = 0; i < inp_string.size(); i++) {
+		char head = inp_string[i];
+		if (!isdigit(head) && !(i==0 && head == '-')) return false;
+	}
+	return true;
 }
 
 bool is_stack(string inp_string) {return inp_string[0]=='(' && inp_string.size()>1;}
@@ -161,15 +164,15 @@ line_pair bi_math(stack line, long stack_pointer, string operation) { //built-in
 		cout << "wrong arguments for function " << operation << arg1 << " " << arg2 << " " << endl;
 		return empty_pair;
 	}
-	long result = 0;
-	if (operation == "+") result = stol(arg1) + stol(arg2);
-	else if (operation == "-") result = stol(arg1) - stol(arg2);
-	else if (operation == "*") result = stol(arg1) * stol(arg2);
-	else if (operation == "/") result = stol(arg1) / stol(arg2);
-	else if (operation == "%") result = stol(arg1) % stol(arg2);
+	string result;
+	if (operation == "+") result = to_string(stol(arg1) + stol(arg2));
+	else if (operation == "-") result = to_string(stol(arg1) - stol(arg2));
+	else if (operation == "*") result = to_string(stol(arg1) * stol(arg2));
+	else if (operation == "/") result = to_string(stol(arg1) / stol(arg2));
+	else if (operation == "%") result = to_string(stol(arg1) % stol(arg2));
 	else cout << "something went awfully wrong" << endl;
 	line.erase(line.begin()+stack_pointer-2, line.begin()+stack_pointer+1);
-	line.insert(line.begin()+stack_pointer-2, to_string(result));
+	line.insert(line.begin()+stack_pointer-2, result);
 	line_pair ret_pair (stack_pointer-2, line);
 	return ret_pair;
 }
@@ -313,7 +316,7 @@ line_pair parse_function(stack line, long stack_pointer, string fun_name) {
 				stack branch_tail;
 				if (fun_sign != fun_stack.end()) branch_tail.insert(branch_tail.begin(), fun_sign+1, fun_stack.begin()+i);
 				else branch_tail.insert(branch_tail.begin(), fun_stack.begin()+last_found+1, fun_stack.end());
-				if (debug_mode) cout << fun_stack.size() << " if " << desplit(branch_head) << "then " << desplit(branch_tail) << endl;
+				if (debug_mode && i!=fun_stack.size()) cout << fun_stack.size() << " if " << desplit(branch_head) << "then " << desplit(branch_tail) << endl;
 				if (i == fun_stack.size() || parse_condition(branch_head)) { //wenn die branch-condition zutriffz, für den branch_stack aus
 					fun_stack = branch_tail;
 					break;
@@ -381,10 +384,10 @@ void eval_file(string name, bool execute = false) {
 int main(int argc,  char** argv) {
 	eval_file("std.fun"); //standard library ist standard
 	if (argc > 1) { 
-		for (int i = 2; i < argc; i++) {
+		for (int i = 1; i < argc-1; i++) {
 			main_args.push_back(argv[i]);
 		}
-		eval_file(argv[1], true); //file ausführen
+		eval_file(argv[argc-1], true); //file ausführen
 	} else { //REPL modus
 		stack inp_stack; stack outp_stack;
 		for (;;) { //Endlosschleife 
