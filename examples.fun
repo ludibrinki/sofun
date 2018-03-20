@@ -24,4 +24,4 @@ a is_palindrome ? a reverse a eq_stack : 1 ? 0
 a less : a popped ( a pop <= ) filter
 a greater : a popped ( a pop > ) filter
 a quicksort ? a size 1 <= : a ? a less quicksort a pop push a greater quicksort concat
-main : range
+main : quicksort
