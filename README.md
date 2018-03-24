@@ -1,11 +1,7 @@
-# SOFUNLANG
-This repository contains my REPL for a stack-oriented functional language in reverse polish notation. See the language specification for more information about the language itself. 
-Just to get an idea of the syntax: the following is the solution of the first task of projecteuler.net, "Find the sum of all the multiples of 3 or 5 below 1000.".
+# SOFUN
+  Sofun (Abk.: Stack-Oriented FUNctional language) ist in erster Linie eine stackorientierte Sprache: Alle Ausdrücke (d.h. Werte und Funktionen) werden vom Interpreter in Stacks aufgelöst und als einzige Datenstruktur stehen ebenfalls Stacks zur Verfügung. Funktionen können dabei als - teilweise argumentabhängige - Repräsentationen von Abschnitten des aufrufenden Stacks angesehen werden: Sie werden vom Interpreter, wie Inline-Funktionen in imperativen Sprachen, durch die repräsentierten Stacks ersetzt. Nach dem Parsing besteht also das ganze Programm aus einem einzigen Stack aus Elementarfunktionen - dem Mainstack. Dieser wird evaluiert und ergibt den Rückgabewert des Programms.
+  
+  Obwohl die Sprache also einige Eigenschaften einer funktionalen Sprache teilt, ist sie nicht rein funktional. 
+  Hier ein Beispiel des Syntax:
 
     num sums ? 1000 num = : 0 ? num 3 % ~ num 5 % ~ | : num num 1 + sums + ? num 1 + sums
-    
-The above function gives you the correct result, when executed as "1 sums". 
-As you see, due to reverse polish notation SOFun's code isn't really readable. Then again, all of it's syntax just consists of ':'s and '?'s: no braces, no semicolons, no keywords. Just two symbols and a few built-in functions that behave exactly the same as any other function you could write yourself.
-
-You can compile the source with "g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11".
-
