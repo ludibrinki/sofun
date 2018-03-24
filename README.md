@@ -5,4 +5,3 @@
   Hier ein Beispiel des Syntax:
 
     num sums ? 1000 num = : 0 ? num 3 % ~ num 5 % ~ | : num num 1 + sums + ? num 1 + sums
-
