@@ -47,6 +47,7 @@ bool is_numeric(string inp_string) {
 	if (inp_string.size() < 1) return true;
 	for (int i = 0; i < inp_string.size(); i++) {
 		char head = inp_string[i];
+		if (i==0 && head=='-' && inp_string.size()<=1) return false;
 		if (!isdigit(head) && !(i==0 && head == '-')) return false;
 	}
 	return true;

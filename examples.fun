@@ -21,7 +21,7 @@ a is_prime : a a 1 - is_prime_back
 a is_palindrome ? a reverse a eq_stack : 1 ? 0
 
 #quicksort
-a less : a popped ( a pop <= ) filter
+a lesser : a popped ( a pop <= ) filter
 a greater : a popped ( a pop > ) filter
-a quicksort ? a size 1 <= : a ? a less quicksort a pop push a greater quicksort concat
-main : quicksort
+a sort ? a size 1 <= : a ? a lesser sort a pop push a greater sort concat
+main : sort
