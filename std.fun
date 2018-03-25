@@ -13,6 +13,7 @@ a b min ? a b < : a ? b
 a b max ? a b > : a ? b
 base exp ^ ? exp 1 = : base ? base base exp 1 - ^ *
 a ! ? a 1 = : 1 ? a a 1 - ! *
+a abs ? a 0 > : a ? 0 a -
 
 #stacks
 a f e foldl ? a is_empty : e ? a popped f e a pop f flatten foldl 
