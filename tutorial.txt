@@ -1,0 +1,27 @@
+Sofun - Das Tutorial
+--------
+
+Wie in funktionalen Sprachen üblich, wird dieses Tutorial nicht mit einem "Hello-World" beginnen. Stattdessen werden wir zuerst die REPL benutzen um kleinstprogramme auszuführen. Da Sofun kein I/O-System im eigentlichen Sinne besitzt, wird es auch überhaupt kein "Hello, World" geben. Wir begrüßen die Welt stattdessen mit der Sprache des Universums: Mathematik.
+
+(Code, der direkt in die REPL kopiert und ausgeführt werden kann, wird in diesem text-file durch Einrückung um einen Tab erkennbar gemacht.)
+
+	1 1 +
+
+Um die Notation zu verstehen, in der diese einfache Rechenaufgabe verfasst ist, empfehle ich den Abschnitt "Reverse Polish Notation" in der specification. Wer dieses Konzept verstanden hat wird nicht überrascht sein, dass das Ergebnis dieser Rechnung dem Ergebnis vom "1 + 1" der Schulmathematik enspricht: 2.
+So weit, so einfach. Wagen wir uns an etwas schwierigeres heran: Eine Definition.
+
+	a : 1
+
+Wir haben jetzt einen neuen Bezeichner für die Zahl 1. Diesen können wir überall genauso benutzen, wie das, was er bezeichnet.
+
+	a a +
+
+Wird nun auch 2 zurückgeben. Wir können aber nicht nur ein Stackelement bezeichnen, sondern einen beliebig langen Stack:
+
+	inc : a +
+
+Wenn du die repl zwischendurch nicht verlassen hast, a also immernoch 1 bezeichnet, dann kannst du mit inc jetzt andere Zahlen inkrementieren, das heißt um 1 erhöhen:
+
+	4 inc
+
+wird 5 zurückgeben. 
