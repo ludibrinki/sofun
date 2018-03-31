@@ -40,6 +40,7 @@ bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
 line_pair empty_pair (0,empty_stack); //wird bei error zurückgegeben
 stack main_args {};
+map<char*, long> ptr_count;
 
 //----------------------------------------------------misc
 
@@ -77,6 +78,22 @@ stack::iterator my_find(stack &haystack, char *needle, int start_offset = 0, int
 	}
 	return it;
 }
+
+char *closing_bracket_str() {
+	char *ret = (char *) malloc(2);
+	cout << &ret << endl;
+	strcpy(ret, ")");
+	ptr_count[ret] = 1;
+	return ret;
+}
+
+char *empty_stack_str() {
+	char *ret = (char *) malloc(4);
+	strcpy(ret, "( )");
+	ptr_count[ret] = 1;
+	return ret;
+}
+
 
 bool is_numeric(char *inp_string) {
 	if (strlen(inp_string) < 1) return true;
@@ -117,6 +134,8 @@ char *desplit(stack inp_vector, long size = 0) { //pythons join()
 		size += strlen(inp_vector[i]) + 1;
 	}
 	ret = (char*) malloc(size + 1);
+	ptr_count[ret] = 1;
+
 	long pos = 0;
 	for (unsigned long i = 0; i < inp_vector.size(); i++) {
 		strcpy(pos + ret, inp_vector[i]);
@@ -177,7 +196,7 @@ char *popped_stack(char *stack_string) {
 	stack extracted_stack = split(stack_string);
 	if (extracted_stack.size() <= 2) {
 		cout << "can't pop empty stack ";
-		return "( )";
+		return empty_stack_str();
 	}
 	for (unsigned long i = 1; i < extracted_stack.size(); i++) {
 		if (extracted_stack[i][0] == '(') {
@@ -186,7 +205,7 @@ char *popped_stack(char *stack_string) {
 	}
 	extracted_stack.pop_back(); //die Klammer
 	extracted_stack.pop_back();
-	extracted_stack.push_back( ")");
+	extracted_stack.push_back( closing_bracket_str());
 	char *ret = desplit(extracted_stack);
 	return ret;
 }
@@ -198,9 +217,13 @@ char *push_stack(char *stack_string, char *to_push) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
+	cout << ptr_count[extracted_stack.back()] << "\t" << &extracted_stack.back() << endl;
+	ptr_count[extracted_stack.back()] -= 1;
 	extracted_stack.pop_back(); //Die Klammer
+
 	extracted_stack.push_back(to_push);
-	extracted_stack.push_back( ")");
+	ptr_count[to_push] += 1;
+	extracted_stack.push_back( closing_bracket_str());
 
 	char *ret = desplit(extracted_stack);
 	return ret;
@@ -303,6 +326,7 @@ line_pair bi_stack(stack line, long stack_pointer, char *operation) { //built-in
 	else if (0 == strcmp(operation, "push")) result = push_stack(args[0], args[1]);
 
 	else cout << "something went awfully wrong" << endl;
+	
 	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-arg_num, result);
 	line_pair ret_pair (stack_pointer-arg_num, line);
@@ -412,6 +436,9 @@ line_pair parse_function(stack line, long stack_pointer, char *fun_name) {
 		}
 
 	}
+/*	for ( auto it = line.begin()+stack_pointer-args_num; it < line.begin()+stack_pointer + 1; it++){
+		free(*it);
+	}*/
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
 	if (debug_mode) cout << "returning " << desplit(line) << endl;
@@ -436,7 +463,7 @@ stack parse(stack line, bool execute = false) { //syntaktische Analyse (Funktion
 		fun new_fun (fun_args, fun_tail); //Das kommt in die map -> Argumente und der Funktionsschwanz
 		funs[fun_name] = new_fun; //Füge die Funktion zu den derzeitigen Funktionen hinzu
 		if (debug_mode) cout << fun_name << " head: " << desplit(fun_head) << "tail: " << desplit(fun_tail) << endl;
-		if (execute && 0 == strcmp(fun_name, "main")) { //wenns ein file ist und das die main funktion ist
+		if (execute && 0 == strcmp(fun_name, "main")) {  //wenns ein file ist und das die main funktion ist
 			stack args_line; //dann bauen wir eine line aus den cmd argumenten
 			for (unsigned int i = 0; i<main_args.size(); i++) {
 				args_line.push_back(main_args[i]);
@@ -506,4 +533,6 @@ int main(int argc,  char** argv) {
 	line_read = (char *)NULL; //ich hasse es wirklich
 	//std::cout << desplit(split("aa bbb cc d e4 f g s l")) << std::endl;
 	//cout << is_numeric("- 5") << endl;
+	for (auto it = ptr_count.begin(); it != ptr_count.end(); it++)
+		cout << it->second << "\t" << it->first << endl;
 }
