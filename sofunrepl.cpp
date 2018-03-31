@@ -475,9 +475,8 @@ void eval_file(string name, bool execute = false) {
 				parse(split((char *)line.c_str()), execute); //wenns kein kommentar ist, führs aus
 			}
 		}
-	}
-    fun_file.close();
-  } else cout << "Unable to open file " << name << endl;
+	    fun_file.close();
+  	} else cout << "Unable to open file " << name << endl;
 }
 
 //--------------------------------------------------------main
