@@ -105,7 +105,7 @@ stack make_stack_string(stack line, long stack_pointer) {
 			return empty_stack;
 		}
 		return line;
-	} 
+	}
 	return line;
 }
 
@@ -192,7 +192,7 @@ line_pair bi_condition(stack line, long stack_pointer, string operation) { //bui
 			cout << "wrong arguments for function " << operation << desplit(args) << endl;
 			return empty_pair;
 		}
-	}	
+	}
 	long result = 0;
 	if (operation == "<") result = stol(args[0]) < stol(args[1]);
 	else if (operation == "=") result = stol(args[0]) == stol(args[1]);
@@ -220,7 +220,7 @@ line_pair bi_stack(stack line, long stack_pointer, string operation) { //built-i
 			cout << "wrong arguments for function " << operation << desplit(args) << endl;
 			return empty_pair;
 		} else args.push_back(line[stack_pointer-i]);
-	}	
+	}
 	string result;
 	if (operation == "pop") result = pop_stack(args[0]);
 	else if (operation == "popped") result = popped_stack(args[0]);
@@ -238,35 +238,36 @@ line_pair parse_function(stack, long, string); //macht Funktion zu evaluierbarem
 void eval_file(string, bool);
 
 stack evaluate(stack line, long stack_pointer = 0) { //evaluiert den Stack (führt Funktionen aus)
-	line_pair ret_pair = empty_pair;
-	if (debug_mode) cout << "evaluating " << desplit(line) << endl;
-	if (stack_pointer >= line.size()) return line; 
-	string token = line[stack_pointer];
-	if (is_numeric(token)) {
-		if (debug_mode) cout << "numeric " << token << endl;
-		stack_pointer += 1;
-	} else if (token[0] == '(') { //wenn im main stack ein weiterer Stack liegt
-		line = make_stack_string(line, stack_pointer);
-		stack_pointer += 1;
-	} else if (funs.find(token) != funs.end()) { //wenn der token eine bekannte Funktion ist
-		if (debug_mode) cout << "known function " << token << endl;
-		ret_pair = parse_function(line, stack_pointer, token);
-		stack_pointer = ret_pair.first; line = ret_pair.second;
-	} else { //sonst built-in-funktion oder unexpected identifier
-		if (debug_mode) cout << "built-in or unknown " << token << endl;
-		if (token == "+" || token == "-" || token == "*" || token == "/" || token == "%") 
-			ret_pair = bi_math(line, stack_pointer, token);
-		else if (token == "<" || token == "=" || token == ">" || token == "|" || token == "&" || token == "~") 
-			ret_pair = bi_condition(line, stack_pointer, token);
-		else if (token == "pop" || token == "push" || token == "is_empty" || token == "popped")
-			ret_pair = bi_stack(line, stack_pointer, token);
-		else {
-			cout << "unexpected token " << token << endl;
-			return empty_stack;
-		}
-		stack_pointer = ret_pair.first; line = ret_pair.second;
-	}
-	return evaluate(line, stack_pointer);
+  for (;;) {
+  	line_pair ret_pair = empty_pair;
+  	if (debug_mode) cout << "evaluating " << desplit(line) << endl;
+  	if (stack_pointer >= line.size()) return line;
+  	string token = line[stack_pointer];
+  	if (is_numeric(token)) {
+  		if (debug_mode) cout << "numeric " << token << endl;
+  		stack_pointer += 1;
+  	} else if (token[0] == '(') { //wenn im main stack ein weiterer Stack liegt
+  		line = make_stack_string(line, stack_pointer);
+  		stack_pointer += 1;
+  	} else if (funs.find(token) != funs.end()) { //wenn der token eine bekannte Funktion ist
+  		if (debug_mode) cout << "known function " << token << endl;
+  		ret_pair = parse_function(line, stack_pointer, token);
+  		stack_pointer = ret_pair.first; line = ret_pair.second;
+  	} else { //sonst built-in-funktion oder unexpected identifier
+  		if (debug_mode) cout << "built-in or unknown " << token << endl;
+  		if (token == "+" || token == "-" || token == "*" || token == "/" || token == "%")
+  			ret_pair = bi_math(line, stack_pointer, token);
+  		else if (token == "<" || token == "=" || token == ">" || token == "|" || token == "&" || token == "~")
+  			ret_pair = bi_condition(line, stack_pointer, token);
+  		else if (token == "pop" || token == "push" || token == "is_empty" || token == "popped")
+  			ret_pair = bi_stack(line, stack_pointer, token);
+  		else {
+  			cout << "unexpected token " << token << endl;
+  			return empty_stack;
+  		}
+  		stack_pointer = ret_pair.first; line = ret_pair.second;
+  	}
+  }
 }
 
 bool parse_condition(stack condition) {
@@ -299,7 +300,7 @@ line_pair parse_function(stack line, long stack_pointer, string fun_name) {
 		return empty_pair;
 	}
 	map<string, string> args; //map für Namen und tatsächliche Werte der Argumente
-	for (long i = 1; i <= args_num; i++) { 
+	for (long i = 1; i <= args_num; i++) {
 		args[arg_names[args_num-i]] = line[stack_pointer - i]; //das Argument sei das n-te Element vorm Funktionsnamen
 	}
 	for (long i = 0; i < fun_stack.size(); i++) { //dann iteriere über den tail
@@ -325,7 +326,7 @@ line_pair parse_function(stack line, long stack_pointer, string fun_name) {
 				last_found = i;
 			}
 		}
-		
+
 	}
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
@@ -354,7 +355,7 @@ stack parse(stack line, bool execute = false) { //syntaktische Analyse (Funktion
 			}
 			args_line.push_back("main"); //und dem tail von main
 			cout << desplit(evaluate(args_line)) << endl;
-		} 
+		}
 		return empty_stack;
 	}
 	return line;
@@ -378,20 +379,20 @@ void eval_file(string name, bool execute = false) {
 		}
 	}
     fun_file.close();
-  } else cout << "Unable to open file " << name << endl; 
+  } else cout << "Unable to open file " << name << endl;
 }
 
 //--------------------------------------------------------main
 int main(int argc,  char** argv) {
 	eval_file("std.fun"); //standard library ist standard
-	if (argc > 1) { 
+	if (argc > 1) {
 		for (int i = 1; i < argc-1; i++) {
 			main_args.push_back(argv[i]);
 		}
 		eval_file(argv[argc-1], true); //file ausführen
 	} else { //REPL modus
 		stack inp_stack; stack outp_stack;
-		for (;;) { //Endlosschleife 
+		for (;;) { //Endlosschleife
 			rl_gets();
 			string inp_line = line_read;
 			if (inp_line.front() == ':') { //wenn es ein repl-befehl ist
@@ -407,4 +408,3 @@ int main(int argc,  char** argv) {
 	free (line_read); //ich hasse C
 	line_read = (char *)NULL; //ich hasse es wirklich
 }
-
