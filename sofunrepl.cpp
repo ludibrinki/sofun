@@ -14,6 +14,7 @@
 //compile with g++ -o sfrepl sofunrepl.cpp -lreadline -lstdc++ -std=c++11
 //compile with performance analysis with -pg and -no-pie and gprof sfrepl | gprof2dot -s -w | dot -Tpng -o output.png
 
+
 //-------------------------------------------------noise
 static char *line_read = (char *)NULL; //warum, C?
 char * rl_gets () { //basic functionality of the readline library, copied from it's website
@@ -79,21 +80,16 @@ stack::iterator my_find(stack &haystack, char *needle, int start_offset = 0, int
 	return it;
 }
 
-char *closing_bracket_str() {
-	char *ret = (char *) malloc(2);
-	cout << &ret << endl;
-	strcpy(ret, ")");
-	ptr_count[ret] = 1;
-	return ret;
-}
+void my_free(stack::iterator b, stack::iterator e) {
 
-char *empty_stack_str() {
-	char *ret = (char *) malloc(4);
-	strcpy(ret, "( )");
-	ptr_count[ret] = 1;
-	return ret;
+	for ( auto it = b; it < e; it++){
+		ptr_count[*it] -= 1;
+		if (ptr_count[*it] == -1)
+			cout << "ERROR: " << *it << endl;
+		if (ptr_count[*it] == 0)
+			free(*it);
+	}
 }
-
 
 bool is_numeric(char *inp_string) {
 	if (strlen(inp_string) < 1) return true;
@@ -164,6 +160,7 @@ stack make_stack_string(stack line, long stack_pointer) {
 			stack inner_stack (line.begin()+stack_pointer, line.begin()+stack_end+1);
 			char *inner_stack_string = desplit(inner_stack);
 			inner_stack_string[strlen(inner_stack_string)-1] = '\0';
+			my_free(line.begin()+stack_pointer, line.begin()+stack_end+1);
 			line.erase(line.begin()+stack_pointer, line.begin()+stack_end+1);
 			line.insert(line.begin()+stack_pointer, inner_stack_string);
 		} else {
@@ -188,6 +185,7 @@ char *pop_stack(char *stack_string) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
+	ptr_count[extracted_stack.back()] -= 1;
 	extracted_stack.pop_back(); //Die Klammer
 	return extracted_stack.back();
 }
@@ -196,7 +194,11 @@ char *popped_stack(char *stack_string) {
 	stack extracted_stack = split(stack_string);
 	if (extracted_stack.size() <= 2) {
 		cout << "can't pop empty stack ";
-		return empty_stack_str();
+		char *b = (char *) malloc(4);
+		strcpy(b, "( )");
+		extracted_stack.push_back(b);
+		ptr_count[extracted_stack.back()] = 1;
+		return b;
 	}
 	for (unsigned long i = 1; i < extracted_stack.size(); i++) {
 		if (extracted_stack[i][0] == '(') {
@@ -205,7 +207,11 @@ char *popped_stack(char *stack_string) {
 	}
 	extracted_stack.pop_back(); //die Klammer
 	extracted_stack.pop_back();
-	extracted_stack.push_back( closing_bracket_str());
+	
+	char *b = (char *) malloc(2);
+	strcpy(b, ")");
+	extracted_stack.push_back(b);
+	ptr_count[extracted_stack.back()] = 1;
 	char *ret = desplit(extracted_stack);
 	return ret;
 }
@@ -217,13 +223,15 @@ char *push_stack(char *stack_string, char *to_push) {
 			extracted_stack = make_stack_string(extracted_stack, i);
 		}
 	}
-	cout << ptr_count[extracted_stack.back()] << "\t" << &extracted_stack.back() << endl;
-	ptr_count[extracted_stack.back()] -= 1;
+	//ptr_count[extracted_stack.back()] -= 1;
 	extracted_stack.pop_back(); //Die Klammer
 
 	extracted_stack.push_back(to_push);
-	ptr_count[to_push] += 1;
-	extracted_stack.push_back( closing_bracket_str());
+
+	char *b = (char *) malloc(2);
+	strcpy(b, ")");
+	extracted_stack.push_back(b);
+	ptr_count[extracted_stack.back()] = 1;
 
 	char *ret = desplit(extracted_stack);
 	return ret;
@@ -266,6 +274,7 @@ line_pair bi_math(stack line, long stack_pointer, char *operation) { //built-in 
 		result = (char*) malloc(size + 1);
 		sprintf(result, "%ld", arg1_int % arg2_int);
 	} else cout << "something went awfully wrong" << endl;
+	my_free(line.begin()+stack_pointer-2, line.begin()+stack_pointer+1);
 	line.erase(line.begin()+stack_pointer-2, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-2, result);
 	line_pair ret_pair (stack_pointer-2, line);
@@ -295,6 +304,7 @@ line_pair bi_condition(stack line, long stack_pointer, char *operation) { //buil
 	else if (0 == strcmp(operation, "&")) result = strtol(args[0], NULL, 10) && strtol(args[1], NULL, 10);
 	else if (0 == strcmp(operation, "~")) result = !strtol(args[0], NULL, 10);
 	else cout << "something went awfully wrong" << endl;
+	my_free(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 
 	//int result_size = snprintf(NULL, 0, "%ld", result);
@@ -326,7 +336,8 @@ line_pair bi_stack(stack line, long stack_pointer, char *operation) { //built-in
 	else if (0 == strcmp(operation, "push")) result = push_stack(args[0], args[1]);
 
 	else cout << "something went awfully wrong" << endl;
-	
+
+	my_free(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);	
 	line.erase(line.begin()+stack_pointer-arg_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-arg_num, result);
 	line_pair ret_pair (stack_pointer-arg_num, line);
@@ -436,9 +447,8 @@ line_pair parse_function(stack line, long stack_pointer, char *fun_name) {
 		}
 
 	}
-/*	for ( auto it = line.begin()+stack_pointer-args_num; it < line.begin()+stack_pointer + 1; it++){
-		free(*it);
-	}*/
+
+	my_free(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.erase(line.begin()+stack_pointer-args_num, line.begin()+stack_pointer+1);
 	line.insert(line.begin()+stack_pointer-args_num, fun_stack.begin(), fun_stack.end());
 	if (debug_mode) cout << "returning " << desplit(line) << endl;
@@ -534,5 +544,5 @@ int main(int argc,  char** argv) {
 	//std::cout << desplit(split("aa bbb cc d e4 f g s l")) << std::endl;
 	//cout << is_numeric("- 5") << endl;
 	for (auto it = ptr_count.begin(); it != ptr_count.end(); it++)
-		cout << it->second << "\t" << it->first << endl;
+		cout << it->second << "\t" << it->first << "\t" << &it->first << endl;
 }
