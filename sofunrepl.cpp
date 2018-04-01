@@ -86,8 +86,8 @@ void my_free(stack::iterator b, stack::iterator e) {
 		ptr_count[*it] -= 1;
 		if (ptr_count[*it] == -1)
 			cout << "ERROR: " << *it << endl;
-		if (ptr_count[*it] == 0)
-			free(*it);
+	/*	if (ptr_count[*it] == 0)
+			free(*it);*/
 	}
 }
 
@@ -116,6 +116,8 @@ stack split(char *inp_string) { //funktion wie das python split()
 				strncpy(identifier, inp_string + last_space + 1, i - last_space - 1);
 				identifier[i - last_space - 1 ] = '\0';
 				ret_vector.push_back(identifier);
+				ptr_count[identifier] = 1;
+				cout << &identifier << "\t" << &ret_vector.back() << endl;
 			}
 			last_space = i;
 		}
