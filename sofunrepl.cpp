@@ -41,7 +41,7 @@ bool debug_mode = 0; //jeden Schritt der REPL printen
 stack empty_stack {}; //wird bei error zurückgegeben
 line_pair empty_pair (0,empty_stack); //wird bei error zurückgegeben
 stack main_args {};
-map<char*, long> ptr_count;
+map<void*, long> ptr_count;
 
 //----------------------------------------------------misc
 
@@ -84,10 +84,10 @@ void my_free(stack::iterator b, stack::iterator e) {
 
 	for ( auto it = b; it < e; it++){
 		ptr_count[*it] -= 1;
-		if (ptr_count[*it] == -1)
+		if (ptr_count[(void *)*it] == -1)
 			cout << "ERROR: " << *it << endl;
-	/*	if (ptr_count[*it] == 0)
-			free(*it);*/
+	//	if (ptr_count[*it] == 0)
+	//		free(*it);
 	}
 }
 
@@ -116,8 +116,7 @@ stack split(char *inp_string) { //funktion wie das python split()
 				strncpy(identifier, inp_string + last_space + 1, i - last_space - 1);
 				identifier[i - last_space - 1 ] = '\0';
 				ret_vector.push_back(identifier);
-				ptr_count[identifier] = 1;
-				cout << &identifier << "\t" << &ret_vector.back() << endl;
+				ptr_count[(void *) identifier] = 1;
 			}
 			last_space = i;
 		}
@@ -175,8 +174,11 @@ stack make_stack_string(stack line, long stack_pointer) {
 }
 
 char *is_empty_stack(char *stack_string) {
-	if (split(stack_string).size() <= 2) return "1";
-	else return "0";
+	char *ret = (char *) malloc(2);
+	if (split(stack_string).size() <= 2) strcpy(ret, "1");
+	else strcpy(ret, "0");
+	ptr_count[(void *) ret] = 1;
+	return ret;
 }
 
 char *pop_stack(char *stack_string) {
@@ -546,5 +548,5 @@ int main(int argc,  char** argv) {
 	//std::cout << desplit(split("aa bbb cc d e4 f g s l")) << std::endl;
 	//cout << is_numeric("- 5") << endl;
 	for (auto it = ptr_count.begin(); it != ptr_count.end(); it++)
-		cout << it->second << "\t" << it->first << "\t" << &it->first << endl;
+		cout << it->second << "\t" << it->first << "\t" << (char *) it->first << endl;
 }
